@@ -117,7 +117,7 @@ module Rack
     # This implements the Rack interface
     #
     # @param [Hash] env The Rack environment
-    # @return [Rack::Response] A Rack response
+    # @return [Array<Numeric, Hash, #each>] A Rack response
     def self.call(env)
       new(env).call
     end
@@ -141,7 +141,7 @@ module Rack
     end
 
     # This is the main method responsible for generating a Rack response.
-    # You typically won't need to override this method of call it directly.
+    # You typically won't need to override this method or call it directly.
     # First this will run the before filters for this action.
     # If none of the before filters generate a response, this will call
     # {#respond} to generate a response.
