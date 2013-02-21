@@ -7,7 +7,6 @@ class Rack::ActionTest < RackTest
     app = Class.new(Rack::Action)
 
     response = get app, "/"
-
     assert_equal 200, response.status
     assert_equal Rack::Action::DEFAULT_RESPONSE.length, response.length
     assert_equal 'text/html', response["Content-Type"]

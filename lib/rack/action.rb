@@ -2,6 +2,7 @@ require 'time'
 require 'json'
 require 'rack'
 require 'rack/filters'
+require 'rack/version'
 
 module Rack
   # Rack::Action provides functionality to generate a Rack response.
@@ -104,9 +105,11 @@ module Rack
     extend Filters
 
     # @private
-    RACK_ROUTE_PARAMS = 'route.route_params'.freeze
+    RACK_ROUTE_PARAMS = 'rack.route_params'.freeze
     # @private
     CONTENT_TYPE = 'Content-Type'.freeze
+    # @private
+    TEXT_HTML = 'text/html'.freeze
     # @private
     APPLICATION_JSON = 'application/json'.freeze
     # @private
@@ -137,7 +140,10 @@ module Rack
     end
 
     def params
-      @params ||= request.params.merge(env[RACK_ROUTE_PARAMS] || {})
+      @params ||= begin
+        p = request.params.merge(env[RACK_ROUTE_PARAMS] || {})
+        p.respond_to?(:with_indifferent_access) ? p.with_indifferent_access : p
+      end
     end
 
     # This is the main method responsible for generating a Rack response.
@@ -150,6 +156,8 @@ module Rack
     #
     # @return [Array<Numeric, Hash, #each>] A Rack response
     def call
+      log_call
+      set_default_headers
       run_before_filters
       run_respond
       run_after_filters
@@ -195,9 +203,28 @@ module Rack
     def redirect_to(url, options={})
       full_url = absolute_url(url, options)
       response[LOCATION] = full_url
-      response.status = 302
-      response.write ''
+      respond_with 302
       full_url
+    end
+
+    # Convenience method to return a 404
+    def not_found
+      respond_with 404
+    end
+
+    # Convenience method to return a 403
+    def forbidden
+      respond_with 403
+    end
+
+    # This is a convenience method to set the response code and
+    # set the response so that it stops respond process.
+    #
+    # @param [Fixnum] status_code The HTTP status code to use in the response
+    def respond_with(status_code)
+      response.status = status_code
+      response.write ''
+      nil
     end
 
     # Generate an absolute url from the url.  If the url is already
@@ -217,10 +244,26 @@ module Rack
     end
 
     protected
+    def log_call
+      if logger
+        logger.debug do
+          "#{self.class} #{request.env["REQUEST_METHOD"]} params: #{params.inspect}"
+        end
+      end
+    end
+
+    def set_default_headers
+      response[CONTENT_TYPE] = TEXT_HTML
+    end
+
     def run_before_filters
       self.class.before_filters.each do |filter|
+        logger.debug "Running #{filter} before filter" if logger
         send(filter)
-        return unless response.empty?
+        unless response.empty?
+          logger.debug "#{filter} responded, halting filter chain" if logger
+          return
+        end
       end
     end
 
@@ -236,12 +279,29 @@ module Rack
 
     def run_after_filters
       self.class.after_filters.each do |filter|
+        logger.debug "Running #{filter} after filter" if logger
         send(filter)
       end
     end
 
     def finish_response
       response.finish
+    end
+
+    def logger
+      self.class.logger
+    end
+
+    def self.logger
+      if defined? @logger
+        @logger
+      else
+        @logger = superclass.logger if superclass.respond_to?(:logger)
+      end
+    end
+
+    def self.logger=(logger)
+      @logger = logger
     end
 
     # @private

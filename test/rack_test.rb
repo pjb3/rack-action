@@ -1,5 +1,15 @@
 require 'test/unit'
 require 'stringio'
+require 'logger'
+require 'fileutils'
+
+if ENV['RACK_ACTION_TEST_LOGGER'].to_s.downcase == 'stdout'
+  Rack::Action.logger = Logger.new(STDOUT)
+elsif ENV['RACK_ACTION_TEST_LOGGER']
+  log_file = File.expand_path(ENV['RACK_ACTION_TEST_LOGGER'])
+  FileUtils.mkdir_p File.dirname(log_file)
+  Rack::Action.logger = Logger.new(log_file)
+end
 
 class RackTest < Test::Unit::TestCase
 
