@@ -109,6 +109,8 @@ module Rack
     # @private
     CONTENT_TYPE = 'Content-Type'.freeze
     # @private
+    HTTP_ACCEPT = 'HTTP_ACCEPT'.freeze
+    # @private
     TEXT_HTML = 'text/html'.freeze
     # @private
     APPLICATION_JSON = 'application/json'.freeze
@@ -143,6 +145,16 @@ module Rack
       @params ||= begin
         p = request.params.merge(env[RACK_ROUTE_PARAMS] || {})
         p.respond_to?(:with_indifferent_access) ? p.with_indifferent_access : p
+      end
+    end
+
+    def format
+      if params[:format]
+        params[:format]
+      elsif env[HTTP_ACCEPT] == APPLICATION_JSON
+        "json"
+      else
+        "html"
       end
     end
 
@@ -247,7 +259,7 @@ module Rack
     def log_call
       if logger
         logger.debug do
-          "#{self.class} #{request.env["REQUEST_METHOD"]} params: #{params.inspect}"
+          "#{self.class} #{request.env["REQUEST_METHOD"]} format: #{format.inspect}, params: #{params.inspect}"
         end
       end
     end
