@@ -44,6 +44,22 @@ class Rack::ActionTest < RackTest
     assert_equal [expected], response.body
   end
 
+  def test_json_respond_with_status_code
+    app = Class.new(Rack::Action) do
+      def respond
+        json({:hello => "world"}, :status => 420)
+      end
+    end
+    expected = %{{"hello":"world"}}
+
+    response = get app, "/"
+
+    assert_equal 420, response.status
+    assert_equal expected.length, response.length
+    assert_equal 'application/json', response["Content-Type"]
+    assert_equal [expected], response.body
+  end
+
   def test_pretty_json_respond
     app = Class.new(Rack::Action) do
       def respond

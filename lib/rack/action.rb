@@ -5,7 +5,7 @@ require 'rack/filters'
 
 module Rack
   class Action
-    VERSION = '0.2.1'
+    VERSION = '0.3.0'
 
     extend Filters
 
@@ -95,9 +95,12 @@ module Rack
     # and writes the JSON String to the response.
     #
     # @param [Hash] data The data
+    # @param [Hash] options The options
+    # @option options [Fixnum] :status The response status code
     # @return [String] The JSON
-    def json(data)
+    def json(data={}, options={})
       response[CONTENT_TYPE] = APPLICATION_JSON
+      response.status = options[:status] if options.has_key?(:status)
       response.write JSON.generate(data)
     end
 
@@ -105,9 +108,12 @@ module Rack
     # and writes the pretty-formatted JSON String to the response.
     #
     # @param [Hash] data The data
+    # @param [Hash] options The options
+    # @option options [Fixnum] :status The response status code
     # @return [String] The JSON
-    def pretty_json(data)
+    def pretty_json(data={}, options={})
       response[CONTENT_TYPE] = APPLICATION_JSON
+      response.status = options[:status] if options.has_key?(:status)
       response.write JSON.pretty_generate(data)
     end
 
