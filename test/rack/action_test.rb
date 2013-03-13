@@ -188,4 +188,73 @@ class Rack::ActionTest < RackTest
     assert_equal "http://test.com/login", response["Location"]
   end
 
+  def test_documentation
+    charge = Class.new do
+
+    end
+    app = Class.new(Rack::Action) do
+
+      documentation = {
+        :name => "foo",
+        :description => "bar",
+        :params => [
+          {
+            :name => :amount,
+            :type => :integer,
+            :required => true
+          }
+        ]
+      }
+
+      documentation do
+        name "Creating a new charge (charging a credit card)"
+        description "To charge a credit card, you create a new charge object. If your API key is in test mode, the supplied card won't actually be charged, though everything else will occur as if in live mode. (Stripe assumes that the charge would have completed successfully)"
+
+        params do
+
+
+          integer :amount,
+            :required => true,
+            :doc => "A positive integer in cents representing how much to charge the card. The minimum amount is 50 cents."
+
+          string :currency,
+            :required => true,
+            :doc => "3-letter ISO code for currency."
+
+          integer :customer,
+            :note => "either customer or card is required, but not both",
+            :doc => " The ID of an existing customer that will be charged in this request."
+
+          object :card,
+            :note => "either card or customer is required, but not both"
+            :doc => "A card to be charged. The card can either be a token, like the ones returned by Stripe.js, or a dictionary containing a user's credit card details, with the options described below. Although not all information is required, the extra info helps prevent fraud." do
+            string :number, :required => true, :doc => "The card number, as a string without any separators."
+            string :exp_month, :required => true, :doc => "Two digit number representing the card's expiration month."
+            string :exp_year, :required => true, :doc => "Two or four digit number representing the card's expiration year."
+            string :cvc, :note => "highly recommended", :doc => "Card security code"
+            string :name, :doc => "Cardholder's full name."
+            string :address_line1
+            string :address_line2
+            string :address_city
+            string :address_zip
+            string :address_state
+            string :address_country
+          end
+
+          string :description,
+            :note => "default is null",
+            :doc => "An arbitrary string which you can attach to a charge object. It is displayed when in the web interface alongside the charge. It's often a good idea to use an email address as a description for tracking later."
+
+          integer :application_fee,
+            :doc => %{A fee in cents that will be applied to the charge and transferred to the application owner's Stripe account. The request must be made with an OAuth key in order to take an application fee. For more information, see the application fees <a href="https://stripe.com/docs/connect/collecting-fees">documentation</a>.}
+
+        end
+
+        response 200, "The charge succeeded" do
+          object :charge, :type => Charge
+        end
+      end
+    end
+  end
+
 end
