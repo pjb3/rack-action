@@ -5,7 +5,7 @@ require 'rack/filters'
 
 module Rack
   class Action
-    VERSION = '0.3.0'
+    VERSION = '0.4.0'
 
     extend Filters
 
@@ -23,6 +23,8 @@ module Rack
     LOCATION = 'Location'.freeze
     # @private
     DEFAULT_RESPONSE = "Default Rack::Action Response"
+    # @private
+    RACK_INPUT = 'rack.input'.freeze
 
     # This implements the Rack interface
     #
@@ -49,6 +51,11 @@ module Rack
     def params
       @params ||= begin
         p = request.params.merge(env[RACK_ROUTE_PARAMS] || {})
+        if request.content_type == APPLICATION_JSON
+          body = env[RACK_INPUT].read
+          env[RACK_INPUT].rewind
+          p.merge!(JSON.parse(body))
+        end
         p.respond_to?(:with_indifferent_access) ? p.with_indifferent_access : p
       end
     end
