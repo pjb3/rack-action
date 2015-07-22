@@ -5,7 +5,7 @@ require 'rack/filters'
 
 module Rack
   class Action
-    VERSION = '0.4.0'
+    VERSION = '0.4.1'
 
     extend Filters
 
@@ -51,7 +51,7 @@ module Rack
     def params
       @params ||= begin
         p = request.params.merge(env[RACK_ROUTE_PARAMS] || {})
-        if request.content_type == APPLICATION_JSON
+        if request.content_type.to_s.include?(APPLICATION_JSON)
           body = env[RACK_INPUT].read
           env[RACK_INPUT].rewind
           p.merge!(JSON.parse(body))
