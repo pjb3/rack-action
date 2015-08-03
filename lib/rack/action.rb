@@ -5,7 +5,7 @@ require 'rack/filters'
 
 module Rack
   class Action
-    VERSION = '0.4.1'
+    VERSION = '0.5.0'
 
     extend Filters
 
@@ -54,7 +54,7 @@ module Rack
         if request.content_type.to_s.include?(APPLICATION_JSON)
           body = env[RACK_INPUT].read
           env[RACK_INPUT].rewind
-          p.merge!(JSON.parse(body))
+          p.merge!(self.class.json_serializer.load(body))
         end
         p.respond_to?(:with_indifferent_access) ? p.with_indifferent_access : p
       end
@@ -108,20 +108,7 @@ module Rack
     def json(data={}, options={})
       response[CONTENT_TYPE] = APPLICATION_JSON
       response.status = options[:status] if options.has_key?(:status)
-      response.write JSON.generate(data)
-    end
-
-    # This is a convenience method that sets the Content-Type headers
-    # and writes the pretty-formatted JSON String to the response.
-    #
-    # @param [Hash] data The data
-    # @param [Hash] options The options
-    # @option options [Fixnum] :status The response status code
-    # @return [String] The JSON
-    def pretty_json(data={}, options={})
-      response[CONTENT_TYPE] = APPLICATION_JSON
-      response.status = options[:status] if options.has_key?(:status)
-      response.write JSON.pretty_generate(data)
+      response.write self.class.json_serializer.dump(data)
     end
 
     # This is a convenience method that forms an absolute URL based on the
@@ -232,6 +219,22 @@ module Rack
 
     def self.logger=(logger)
       @logger = logger
+    end
+
+    def self.json_serializer
+      if defined? @json_serializer
+        @json_serializer
+      else
+        @json_serializer = if superclass.respond_to?(:json_serializer)
+          superclass.json_serializer
+        else
+          JSON
+        end
+      end
+    end
+
+    def self.json_serializer=(json_serializer)
+      @json_serializer = json_serializer
     end
 
     # @private
