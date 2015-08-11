@@ -5,7 +5,7 @@ require 'rack/filters'
 
 module Rack
   class Action
-    VERSION = '0.5.0'
+    VERSION = '0.5.1'
 
     extend Filters
 
@@ -54,7 +54,7 @@ module Rack
         if request.content_type.to_s.include?(APPLICATION_JSON)
           body = env[RACK_INPUT].read
           env[RACK_INPUT].rewind
-          p.merge!(self.class.json_serializer.load(body))
+          p.merge!(self.class.json_serializer.load(body)) if body.present?
         end
         p.respond_to?(:with_indifferent_access) ? p.with_indifferent_access : p
       end
