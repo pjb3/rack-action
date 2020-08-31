@@ -2,7 +2,7 @@ require_relative "lib/rack/action"
 
 app = Class.new(Rack::Action) do
   def respond
-    json env.reject{|k, _| k == "rack.input" || k == "rack.errors" }
+    env.reject{|k, _| ["rack.input", "rack.errors"].include?(k) }
   end
 end
 

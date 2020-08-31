@@ -1,6 +1,6 @@
 Gem::Specification.new do |gem|
   gem.authors       = ["Paul Barry"]
-  gem.email         = ["mail@paulbarry.com"]
+  gem.email         = ["pauljbarry3@gmail.com"]
   gem.description   = "a small, simple framework for generating Rack responses"
   gem.summary       = "a small, simple framework for generating Rack responses"
   gem.homepage      = "http://github.com/pjb3/rack-action"
