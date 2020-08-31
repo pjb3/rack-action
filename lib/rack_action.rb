@@ -1,1 +1,1 @@
-require 'rack/action'
+require "rack/action"

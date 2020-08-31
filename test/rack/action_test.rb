@@ -1,15 +1,13 @@
-require 'rack_action'
-require 'rack_test'
+require "rack_action"
+require "rack_test"
 
 class Rack::ActionTest < RackTest
-
   def test_default_respond
     app = Class.new(Rack::Action)
 
     response = get app, "/"
     assert_equal 200, response.status
-    assert_equal Rack::Action::DEFAULT_RESPONSE.length, response.length
-    assert_equal 'text/html', response["Content-Type"]
+    assert_equal "text/html", response["Content-Type"]
     assert_equal [Rack::Action::DEFAULT_RESPONSE], response.body
   end
 
@@ -23,24 +21,22 @@ class Rack::ActionTest < RackTest
     response = get app, "/"
 
     assert_equal 200, response.status
-    assert_equal 7, response.length
-    assert_equal 'text/html', response["Content-Type"]
-    assert_equal ['bananas'], response.body
+    assert_equal "text/html", response["Content-Type"]
+    assert_equal ["bananas"], response.body
   end
 
   def test_json_respond
     app = Class.new(Rack::Action) do
       def respond
-        json :hello => "world"
+        { hello: "world" }
       end
     end
-    expected = %{{"hello":"world"}}
+    expected = %({"hello":"world"})
 
     response = get app, "/"
 
     assert_equal 200, response.status
-    assert_equal expected.length, response.length
-    assert_equal 'application/json', response["Content-Type"]
+    assert_equal "application/json", response["Content-Type"]
     assert_equal [expected], response.body
   end
 
@@ -50,31 +46,12 @@ class Rack::ActionTest < RackTest
         json({:hello => "world"}, :status => 420)
       end
     end
-    expected = %{{"hello":"world"}}
+    expected = %({"hello":"world"})
 
     response = get app, "/"
 
     assert_equal 420, response.status
-    assert_equal expected.length, response.length
-    assert_equal 'application/json', response["Content-Type"]
-    assert_equal [expected], response.body
-  end
-
-  def test_pretty_json_respond
-    app = Class.new(Rack::Action) do
-      def respond
-        pretty_json :hello => "world"
-      end
-    end
-    expected = %{{
-  "hello": "world"
-}}
-
-    response = get app, "/"
-
-    assert_equal 200, response.status
-    assert_equal expected.length.to_s, response["Content-Length"]
-    assert_equal 'application/json', response["Content-Type"]
+    assert_equal "application/json", response["Content-Type"]
     assert_equal [expected], response.body
   end
 
@@ -99,7 +76,7 @@ class Rack::ActionTest < RackTest
   def test_before_filter_set_response
     app = Class.new(Rack::Action) do
       def respond
-        fail "respond should not be called if a before filter sets the response"
+        raise "respond should not be called if a before filter sets the response"
       end
 
       def set_response
@@ -117,7 +94,7 @@ class Rack::ActionTest < RackTest
   def test_redirect
     app = Class.new(Rack::Action) do
       def respond
-        fail "respond should not be called if a before filter sets the response"
+        raise "respond should not be called if a before filter sets the response"
       end
 
       def login_required
@@ -135,7 +112,7 @@ class Rack::ActionTest < RackTest
   def test_redirect_non_default_port
     app = Class.new(Rack::Action) do
       def respond
-        fail "respond should not be called if a before filter sets the response"
+        raise "respond should not be called if a before filter sets the response"
       end
 
       def login_required
@@ -153,7 +130,7 @@ class Rack::ActionTest < RackTest
   def test_redirect_non_default_port_option
     app = Class.new(Rack::Action) do
       def respond
-        fail "respond should not be called if a before filter sets the response"
+        raise "respond should not be called if a before filter sets the response"
       end
 
       def login_required
@@ -171,7 +148,7 @@ class Rack::ActionTest < RackTest
   def test_secure_redirect
     app = Class.new(Rack::Action) do
       def respond
-        fail "respond should not be called if a before filter sets the response"
+        raise "respond should not be called if a before filter sets the response"
       end
 
       def login_required
@@ -189,7 +166,7 @@ class Rack::ActionTest < RackTest
   def test_redirect_absolute_url
     app = Class.new(Rack::Action) do
       def respond
-        fail "respond should not be called if a before filter sets the response"
+        raise "respond should not be called if a before filter sets the response"
       end
 
       def login_required
@@ -203,5 +180,4 @@ class Rack::ActionTest < RackTest
     assert_equal 302, response.status
     assert_equal "http://test.com/login", response["Location"]
   end
-
 end

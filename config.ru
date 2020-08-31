@@ -1,8 +1,8 @@
-require 'rack-action'
+require_relative "lib/rack/action"
 
 app = Class.new(Rack::Action) do
   def respond
-    pretty_json env.except("rack.input", "rack.errors")
+    json env.reject{|k, _| k == "rack.input" || k == "rack.errors" }
   end
 end
 

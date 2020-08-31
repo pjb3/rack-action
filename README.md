@@ -18,10 +18,10 @@ Or install it yourself as:
 
 ## Usage
 
-Rack::Action provides functionality to generate a Rack response. To use Rack::Action, you should subclass Rack::Action and provide your own implementation of `respond`.  The simplest Rack action is
+Rack::Action provides functionality to generate a Rack response. To use Rack::Action, you should subclass Rack::Action and provide your own implementation of `respond`. The simplest Rack action is
 one that just returns a string from respond:
 
-``` ruby
+```ruby
 require 'rack/action'
 
 class MyAction < Rack::Action
@@ -38,7 +38,7 @@ rackup file. Rack::Action is meant to be used with one action per
 page/endpoint in your application, so it is typically used in conjuction
 with something like [Rack::Router][rack-router], which would look something like this:
 
-``` ruby
+```ruby
 require 'rack/action'
 require 'rack/router'
 
@@ -65,19 +65,29 @@ run router
 Rack::Action makes an instance of [Rack::Request][rack-req] and [Rack::Response][rack-res] available
 which can be used to set headers, cookies, etc.
 
-``` ruby
+```ruby
 class ArticleAction < Rack::Action
   def respond
     article = Article.find(params["id"])
-    response['Content-Type'] = "text/xml"
-    article.to_xml
+    response['Content-Type'] = "application/json"
+    article.to_json
+  end
+end
+```
+
+Because responding with JSON is so common, Rack::Action will automatically convert the response to JSON unless the response is a String or an Array. Therefore, the following code snippet provides the same result as the previous:
+
+```ruby
+class ArticleAction < Rack::Action
+  def respond
+    Article.find(params["id"])
   end
 end
 ```
 
 You can use before filters to do things before respond is called:
 
-``` ruby
+```ruby
 class AccountAction < Rack::Action
   before_filter :load_current_user
 
@@ -93,7 +103,7 @@ end
 
 and you can of course share functionality across actions with inheritance:
 
-``` ruby
+```ruby
 class ApplicationAction < Rack::Action
   before_filter :login_required
 
@@ -117,9 +127,9 @@ class PrivateAction < ApplicationAction
 end
 ```
 
-Before filters will execute in the order they are defined.  If a before
+Before filters will execute in the order they are defined. If a before
 filter writes to the response, subsequent filters will not be executed
-and the respond method will not be executed.  As long as no before filters
+and the respond method will not be executed. As long as no before filters
 write to the response, subsequent filters and the respond
 method will be called.
 
