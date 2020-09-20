@@ -4,7 +4,7 @@ require "rack"
 require_relative "filters"
 
 class Rack::Action
-  VERSION = "0.6.0".freeze
+  VERSION = "0.7.0".freeze
 
   extend Rack::Filters
 
